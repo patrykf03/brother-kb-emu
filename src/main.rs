@@ -1,4 +1,7 @@
 use rppal::gpio::{Gpio, OutputPin};
+use std::collections::HashMap;
+use std::time::Duration;
+use std::thread;
 
 // Pin Definitions based on the schematic
 const ENABLE_PIN: u8 = 6;
@@ -65,51 +68,163 @@ impl Multiplexer {
     }
 }
 
+/// Represents the keyboard with mapping from characters to (mux_a_channel, mux_b_channel)
+struct Keyboard {
+    mux_a: Multiplexer,
+    mux_b: Multiplexer,
+    enable: OutputPin,
+    key_map: HashMap<char, (u8, u8)>,
+}
+
+impl Keyboard {
+    fn new(gpio: &Gpio) -> Result<Self, rppal::gpio::Error> {
+        let mut key_map = HashMap::new();
+        
+        // Build mapping table based on mappingtable.md
+        // Format: (mux_a_channel, mux_b_channel) where channels are 0-indexed
+        // Row index = mux_b channel (0-7), Column index = mux_a channel (0-7)
+        
+        // Row 1 (Mux B = 0)
+        key_map.insert(' ', (0, 0));  // spacebar
+        key_map.insert(';', (5, 0));
+        key_map.insert(',', (6, 0));
+        key_map.insert('.', (7, 0));
+        
+        // Row 2 (Mux B = 1)
+        key_map.insert('\n', (0, 1)); // enter
+        key_map.insert('w', (2, 1));
+        key_map.insert('a', (3, 1));
+        key_map.insert('q', (4, 1));
+        key_map.insert('z', (5, 1));
+        key_map.insert('+', (7, 1));
+        
+        // Row 3 (Mux B = 2)
+        key_map.insert('r', (2, 2));
+        key_map.insert('g', (3, 2));
+        key_map.insert('e', (4, 2));
+        key_map.insert('f', (5, 2));
+        key_map.insert('1', (6, 2));
+        key_map.insert('2', (7, 2));
+        
+        // Row 4 (Mux B = 3)
+        key_map.insert('y', (2, 3));
+        key_map.insert('j', (3, 3));
+        key_map.insert('t', (4, 3));
+        key_map.insert('h', (5, 3));
+        key_map.insert('3', (6, 3));
+        key_map.insert('4', (7, 3));
+        
+        // Row 5 (Mux B = 4)
+        key_map.insert('p', (2, 4));
+        key_map.insert('d', (3, 4));
+        key_map.insert('o', (4, 4));
+        key_map.insert('s', (5, 4));
+        key_map.insert('7', (6, 4));
+        key_map.insert('8', (7, 4));
+        
+        // Row 6 (Mux B = 5)
+        key_map.insert('i', (2, 5));
+        key_map.insert('l', (3, 5));
+        key_map.insert('u', (4, 5));
+        key_map.insert('k', (5, 5));
+        key_map.insert('5', (6, 5));
+        key_map.insert('6', (7, 5));
+        
+        // Row 7 (Mux B = 6)
+        key_map.insert('m', (2, 6));
+        key_map.insert('n', (4, 6));
+        key_map.insert('x', (5, 6));
+        key_map.insert('?', (6, 6));
+        
+        // Row 8 (Mux B = 7)
+        key_map.insert('b', (2, 7));
+        key_map.insert('v', (4, 7));
+        key_map.insert('c', (5, 7));
+        key_map.insert('9', (6, 7));
+        key_map.insert('0', (7, 7));
+        
+        Ok(Keyboard {
+            mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
+            mux_b: Multiplexer::new(gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?,
+            enable: gpio.get(ENABLE_PIN)?.into_output(),
+            key_map,
+        })
+    }
+    
+    /// Press a single key by setting the appropriate mux channels and holding for 10ms
+    fn press_key(&mut self, ch: char) -> Result<(), String> {
+        // Look up the character in the key map
+        let (mux_a_ch, mux_b_ch) = self.key_map.get(&ch)
+            .ok_or_else(|| format!("Character '{}' not found in key map", ch))?;
+        
+        println!("Pressing '{}' → Mux A: {}, Mux B: {}", ch, mux_a_ch, mux_b_ch);
+        
+        // Disable multiplexers before changing channels
+        self.enable.set_high();
+        
+        // Set both multiplexer channels
+        self.mux_a.set_channel(*mux_a_ch, &mut self.enable);
+        self.mux_b.set_channel(*mux_b_ch, &mut self.enable);
+        
+        // Enable the multiplexers to "press" the key
+        self.enable.set_low();
+        
+        // Hold for 10ms
+        thread::sleep(Duration::from_millis(10));
+        
+        // Release the key
+        self.enable.set_high();
+        
+        Ok(())
+    }
+    
+    /// Type a string by pressing each character in sequence
+    fn type_string(&mut self, text: &str) -> Result<(), String> {
+        for ch in text.chars() {
+            // Convert to lowercase for simplicity
+            let ch_lower = ch.to_ascii_lowercase();
+            
+            // Skip unmapped characters with a warning
+            if !self.key_map.contains_key(&ch_lower) {
+                println!("Warning: Skipping unmapped character '{}'", ch);
+                continue;
+            }
+            
+            self.press_key(ch_lower)?;
+            
+            // Small delay between keypresses for reliability
+            thread::sleep(Duration::from_millis(50));
+        }
+        Ok(())
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Initializing GPIO pins...");
+    println!("Initializing Brother Keyboard Emulator...");
     
     // Initialize GPIO
     let gpio = Gpio::new()?;
     
-    // Initialize enable pin and multiplexers
-    let mut enable = gpio.get(ENABLE_PIN)?.into_output();
-    let mut mux_a = Multiplexer::new(&gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?;
-    let mut mux_b = Multiplexer::new(&gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?;
+    // Initialize keyboard
+    let mut keyboard = Keyboard::new(&gpio)?;
     
-    // Enable the multiplexers (active LOW)
-    enable.set_low();
+    // Start with multiplexers disabled
+    keyboard.enable.set_high();
     
-    println!("Initialization complete. Starting channel sequence.");
-    println!("Cycling through all combinations with 2s delay.");
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    println!("Initialization complete.");
+    println!("Ready to type text to the typewriter.");
+    println!("---");
     
-    // Iterate through all 64 combinations (8x8)
-    // Outer loop: Mux B, Inner loop: Mux A
-    for b_ch in 0..=7 {
-        for a_ch in 0..=7 {
-            println!("--- Multiplexer Control ---");
-            println!("Setting Mux A: Channel {} | Mux B: Channel {}", a_ch, b_ch);
-            println!("---------------------------");
-            println!("Mux A Pins (S0,S1,S2): {}, {}, {}", MUX_A_S0, MUX_A_S1, MUX_A_S2);
-            println!("Mux B Pins (S0,S1,S2): {}, {}, {}", MUX_B_S0, MUX_B_S1, MUX_B_S2);
-            println!("Enable Pin: {} (State: LOW/ON)", ENABLE_PIN);
-            
-            // Set both channels
-            enable.set_high(); // Disable before changing channels
-            mux_a.set_channel(a_ch, &mut enable);
-            mux_b.set_channel(b_ch, &mut enable);
-            enable.set_low(); // Re-enable after setting channels
-            
-            // Wait 1 second before next combination
-            std::thread::sleep(std::time::Duration::from_secs(1));
-        }
-    }
+    // Example: Type a test string
+    let test_text = "hello world 123";
+    println!("Typing: \"{}\"", test_text);
     
-    println!("\nAll combinations have been cycled through.");
+    keyboard.type_string(test_text)?;
     
-    // Cleanup: disable multiplexers
+    println!("\nTyping complete!");
     println!("Disabling multiplexers...");
-    enable.set_high();
+    keyboard.enable.set_high();
     println!("Done.");
+    
     Ok(())
 }
