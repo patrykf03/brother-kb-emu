@@ -16,11 +16,6 @@ const MUX_B_S0: u8 = 19; // Sel3
 const MUX_B_S1: u8 = 26; // Sel4
 const MUX_B_S2: u8 = 21; // Sel5
 
-// TEST CONFIGURATION: Change these to test different wiring interpretations
-// Try: 0=normal (S0,S1,S2), 1=reversed (S2,S1,S0), 2=swapped S0<->S2 only, etc.
-const MUX_A_REVERSE: bool = true;   // Set false for normal, true for reversed
-const MUX_B_REVERSE: bool = false;  // Set false for normal, true for reversed
-
 /// Represents a single 8-channel multiplexer with 3 select pins
 struct Multiplexer {
     s0: OutputPin,
@@ -84,88 +79,82 @@ impl Keyboard {
     fn new(gpio: &Gpio) -> Result<Self, rppal::gpio::Error> {
         let mut key_map = HashMap::new();
         
-        // Build mapping table based on mappingtable.md
+        // Build mapping table based on schematic
         // Format: (mux_a_channel, mux_b_channel)
-        // Rows = X0-X7 (mux_b), Columns = Y7-Y0 (mux_a, where Y7=7, Y6=6, ..., Y0=0)
+        // Mux channels map to matrix positions via scrambled connections:
+        // Mux A: ch0→Y6, ch1→Y5, ch2→Y4, ch3→Y7, ch4→Y1, ch5→Y2, ch6→Y0, ch7→Y3
+        // Mux B: ch0→X3, ch1→X0, ch2→X1, ch3→X2, ch4→X7, ch5→X5, ch6→X6, ch7→X4
         
-        // X0 (Mux B = 0): Y7=SHIFT, Y6=SPACE, Y5=' ", Y4=RETURN, Y3=: ;, Y2=$, Y1=., Y0=,
-        key_map.insert(' ', (6, 0));  // SPACE at Y6
-        key_map.insert(',', (0, 0));  // , at Y0
-        key_map.insert('.', (1, 0));  // . at Y1
-        key_map.insert('$', (2, 0));  // $ at Y2
-        key_map.insert(';', (3, 0));  // : ; at Y3
-        key_map.insert(':', (3, 0));  // : ; at Y3
-        key_map.insert('\n', (4, 0)); // RETURN at Y4
-        key_map.insert('\'', (5, 0)); // ' " at Y5
-        key_map.insert('"', (5, 0));  // ' " at Y5
+        // X0 (Mux B = 1): Y6=SPACE, Y0=, Y1=. Y2=$ Y3=: ; Y4=RETURN Y5=' "
+        key_map.insert(' ', (0, 1));  // SPACE at Y6 → mux_a=0
+        key_map.insert(',', (6, 1));  // , at Y0 → mux_a=6
+        key_map.insert('.', (4, 1));  // . at Y1 → mux_a=4
+        key_map.insert('$', (5, 1));  // $ at Y2 → mux_a=5
+        key_map.insert(';', (7, 1));  // : ; at Y3 → mux_a=7
+        key_map.insert(':', (7, 1));  // : ; at Y3 → mux_a=7
+        key_map.insert('\n', (2, 1)); // RETURN at Y4 → mux_a=2
+        key_map.insert('\'', (1, 1)); // ' " at Y5 → mux_a=1
+        key_map.insert('"', (1, 1));  // ' " at Y5 → mux_a=1
         
-        // X1 (Mux B = 1): Y7=CAPS, Y6=RETURN, Y5=A, Y4=W, Y3=Z, Y2=Q, Y1=*, Y0=/ ?
-        key_map.insert('/', (0, 1));  // / ? at Y0
-        key_map.insert('?', (0, 1));  // / ? at Y0
-        key_map.insert('*', (1, 1));  // * at Y1
-        key_map.insert('q', (2, 1));  // Q at Y2
-        key_map.insert('z', (3, 1));  // Z at Y3
-        key_map.insert('w', (4, 1));  // W at Y4
-        key_map.insert('a', (5, 1));  // A at Y5
+        // X1 (Mux B = 2): Y0=/ ? Y1=* Y2=Q Y3=Z Y4=W Y5=A
+        key_map.insert('/', (6, 2));  // / ? at Y0 → mux_a=6
+        key_map.insert('?', (6, 2));  // / ? at Y0 → mux_a=6
+        key_map.insert('*', (4, 2));  // * at Y1 → mux_a=4
+        key_map.insert('q', (5, 2));  // Q at Y2 → mux_a=5
+        key_map.insert('z', (7, 2));  // Z at Y3 → mux_a=7
+        key_map.insert('w', (2, 2));  // W at Y4 → mux_a=2
+        key_map.insert('a', (1, 2));  // A at Y5 → mux_a=1
         
-        // X2 (Mux B = 2): Y7=P INS, Y6=INDEX, Y5=G, Y4=R, Y3=F, Y2=E, Y1=2, Y0=1
-        key_map.insert('1', (0, 2));  // 1 at Y0
-        key_map.insert('2', (1, 2));  // 2 at Y1
-        key_map.insert('e', (2, 2));  // E at Y2
-        key_map.insert('f', (3, 2));  // F at Y3
-        key_map.insert('r', (4, 2));  // R at Y4
-        key_map.insert('g', (5, 2));  // G at Y5
+        // X2 (Mux B = 3): Y0=1 Y1=2 Y2=E Y3=F Y4=R Y5=G
+        key_map.insert('1', (6, 3));  // 1 at Y0 → mux_a=6
+        key_map.insert('2', (4, 3));  // 2 at Y1 → mux_a=4
+        key_map.insert('e', (5, 3));  // E at Y2 → mux_a=5
+        key_map.insert('f', (7, 3));  // F at Y3 → mux_a=7
+        key_map.insert('r', (2, 3));  // R at Y4 → mux_a=2
+        key_map.insert('g', (1, 3));  // G at Y5 → mux_a=1
         
-        // X3 (Mux B = 3): Y7=L IND, Y6=RELOC, Y5=J, Y4=Y, Y3=H, Y2=T, Y1=4, Y0=3
-        key_map.insert('3', (0, 3));  // 3 at Y0
-        key_map.insert('4', (1, 3));  // 4 at Y1
-        key_map.insert('t', (2, 3));  // T at Y2
-        key_map.insert('h', (3, 3));  // H at Y3
-        key_map.insert('y', (4, 3));  // Y at Y4
-        key_map.insert('j', (5, 3));  // J at Y5
+        // X3 (Mux B = 0): Y0=3 Y1=4 Y2=T Y3=H Y4=Y Y5=J
+        key_map.insert('3', (6, 0));  // 3 at Y0 → mux_a=6
+        key_map.insert('4', (4, 0));  // 4 at Y1 → mux_a=4
+        key_map.insert('t', (5, 0));  // T at Y2 → mux_a=5
+        key_map.insert('h', (7, 0));  // H at Y3 → mux_a=7
+        key_map.insert('y', (2, 0));  // Y at Y4 → mux_a=2
+        key_map.insert('j', (1, 0));  // J at Y5 → mux_a=1
         
-        // X4 (Mux B = 4): Y7=CODE, Y6=D, Y5=P, Y4=S, Y3=O, Y2=8, Y1=7, Y0=Unused
-        key_map.insert('7', (1, 4));  // 7 at Y1
-        key_map.insert('8', (2, 4));  // 8 at Y2
-        key_map.insert('o', (3, 4));  // O at Y3
-        key_map.insert('s', (4, 4));  // S at Y4
-        key_map.insert('p', (5, 4));  // P at Y5
-        key_map.insert('d', (6, 4));  // D at Y6
+        // X4 (Mux B = 7): Y1=7 Y2=8 Y3=O Y4=S Y5=P Y6=D
+        key_map.insert('7', (4, 7));  // 7 at Y1 → mux_a=4
+        key_map.insert('8', (5, 7));  // 8 at Y2 → mux_a=5
+        key_map.insert('o', (7, 7));  // O at Y3 → mux_a=7
+        key_map.insert('s', (2, 7));  // S at Y4 → mux_a=2
+        key_map.insert('p', (1, 7));  // P at Y5 → mux_a=1
+        key_map.insert('d', (0, 7));  // D at Y6 → mux_a=0
         
-        // X5 (Mux B = 5): Y7=RETURN, Y6=L, Y5=I, Y4=K, Y3=U, Y2=6, Y1=5, Y0=Unused
-        key_map.insert('5', (1, 5));  // 5 at Y1
-        key_map.insert('6', (2, 5));  // 6 at Y2
-        key_map.insert('u', (3, 5));  // U at Y3
-        key_map.insert('k', (4, 5));  // K at Y4
-        key_map.insert('i', (5, 5));  // I at Y5
-        key_map.insert('l', (6, 5));  // L at Y6
+        // X5 (Mux B = 5): Y1=5 Y2=6 Y3=U Y4=K Y5=I Y6=L
+        key_map.insert('5', (4, 5));  // 5 at Y1 → mux_a=4
+        key_map.insert('6', (5, 5));  // 6 at Y2 → mux_a=5
+        key_map.insert('u', (7, 5));  // U at Y3 → mux_a=7
+        key_map.insert('k', (2, 5));  // K at Y4 → mux_a=2
+        key_map.insert('i', (1, 5));  // I at Y5 → mux_a=1
+        key_map.insert('l', (0, 5));  // L at Y6 → mux_a=0
         
-        // X6 (Mux B = 6): Y7=Cancel, Y6=ALT, Y5=M, Y4=X, Y3=N, Y2=1/4, Y1=- _, Y0=Unused
-        key_map.insert('-', (1, 6));  // - _ at Y1
-        key_map.insert('_', (1, 6));  // - _ at Y1
-        key_map.insert('n', (3, 6));  // N at Y3
-        key_map.insert('x', (4, 6));  // X at Y4
-        key_map.insert('m', (5, 6));  // M at Y5
+        // X6 (Mux B = 6): Y1=- _ Y3=N Y4=X Y5=M
+        key_map.insert('-', (4, 6));  // - _ at Y1 → mux_a=4
+        key_map.insert('_', (4, 6));  // - _ at Y1 → mux_a=4
+        key_map.insert('n', (7, 6));  // N at Y3 → mux_a=7
+        key_map.insert('x', (2, 6));  // X at Y4 → mux_a=2
+        key_map.insert('m', (1, 6));  // M at Y5 → mux_a=1
         
-        // X7 (Mux B = 7): Y7=WORD OUT, Y6=TAB, Y5=B, Y4=C, Y3=V, Y2=0, Y1=9, Y0=Unused
-        key_map.insert('9', (1, 7));  // 9 at Y1
-        key_map.insert('0', (2, 7));  // 0 at Y2
-        key_map.insert('v', (3, 7));  // V at Y3
-        key_map.insert('c', (4, 7));  // C at Y4
-        key_map.insert('b', (5, 7));  // B at Y5
-        key_map.insert('\t', (6, 7)); // TAB at Y6
+        // X7 (Mux B = 4): Y1=9 Y2=0 Y3=V Y4=C Y5=B Y6=TAB
+        key_map.insert('9', (4, 4));  // 9 at Y1 → mux_a=4
+        key_map.insert('0', (5, 4));  // 0 at Y2 → mux_a=5
+        key_map.insert('v', (7, 4));  // V at Y3 → mux_a=7
+        key_map.insert('c', (2, 4));  // C at Y4 → mux_a=2
+        key_map.insert('b', (1, 4));  // B at Y5 → mux_a=1
+        key_map.insert('\t', (0, 4)); // TAB at Y6 → mux_a=0
         
         Ok(Keyboard {
-            mux_a: if MUX_A_REVERSE {
-                Multiplexer::new(gpio, MUX_A_S2, MUX_A_S1, MUX_A_S0)?
-            } else {
-                Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?
-            },
-            mux_b: if MUX_B_REVERSE {
-                Multiplexer::new(gpio, MUX_B_S2, MUX_B_S1, MUX_B_S0)?
-            } else {
-                Multiplexer::new(gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?
-            },
+            mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
+            mux_b: Multiplexer::new(gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?,
             enable: gpio.get(ENABLE_PIN)?.into_output(),
             key_map,
         })
@@ -232,21 +221,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("===========================================");
-    println!("Current configuration:");
-    println!("  MUX_A_REVERSE = {}", MUX_A_REVERSE);
-    println!("  MUX_B_REVERSE = {}", MUX_B_REVERSE);
-    println!("===========================================\n");
     println!("Testing: 'hello'\n");
     
     keyboard.type_string("hello")?;
 
-    println!("\n===========================================");
-    println!("If output is still wrong, edit main.rs and change:");
-    println!("  const MUX_A_REVERSE = true/false");
-    println!("  const MUX_B_REVERSE = true/false");
-    println!("Try all 4 combinations: (false,false), (true,false), (false,true), (true,true)");
-    println!("===========================================");
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
     println!("Done.");
