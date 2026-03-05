@@ -93,7 +93,7 @@ impl Keyboard {
         // Row 2 (Mux B = 1)
         key_map.insert('\n', (0, 1)); // enter
         key_map.insert('w', (2, 1));
-        key_map.insert('a', (3, 1));
+        key_map.insert('a', (1, 3));
         key_map.insert('q', (4, 1));
         key_map.insert('z', (5, 1));
         key_map.insert('+', (7, 1));
@@ -216,11 +216,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("---");
     
     // Example: Type a test string
-    let test_text = "hello world 123";
-    println!("Typing: \"{}\"", test_text);
-    
-    keyboard.type_string(test_text)?;
-    
+    //let test_text = "hello world 123";
+    //println!("Typing: \"{}\"", test_text);
+    //
+    //keyboard.type_string(test_text)?;
+    keyboard.press_key('a')?;
+
     println!("\nTyping complete!");
     println!("Disabling multiplexers...");
     keyboard.enable.set_high();
