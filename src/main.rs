@@ -79,78 +79,94 @@ impl Keyboard {
     fn new(gpio: &Gpio) -> Result<Self, rppal::gpio::Error> {
         let mut key_map = HashMap::new();
         
-        // Build mapping table based on schematic
+        // Build mapping table based on empirical testing  
         // Format: (mux_a_channel, mux_b_channel)
-        // Mux channels map to matrix positions via scrambled connections:
-        // Mux A: ch0→Y6, ch1→Y5, ch2→Y4, ch3→Y7, ch4→Y1, ch5→Y2, ch6→Y0, ch7→Y3
-        // Mux B: ch0→X3, ch1→X0, ch2→X1, ch3→X2, ch4→X7, ch5→X5, ch6→X6, ch7→X4
+        // From test data "abcdefghijk" → "n|;4liupeof"
         
-        // X0 (Mux B = 1): Y6=SPACE, Y0=, Y1=. Y2=$ Y3=: ; Y4=RETURN Y5=' "
-        key_map.insert(' ', (0, 1));  // SPACE at Y6 → mux_a=0
-        key_map.insert(',', (6, 1));  // , at Y0 → mux_a=6
-        key_map.insert('.', (4, 1));  // . at Y1 → mux_a=4
-        key_map.insert('$', (5, 1));  // $ at Y2 → mux_a=5
-        key_map.insert(';', (7, 1));  // : ; at Y3 → mux_a=7
-        key_map.insert(':', (7, 1));  // : ; at Y3 → mux_a=7
-        key_map.insert('\n', (2, 1)); // RETURN at Y4 → mux_a=2
-        key_map.insert('\'', (1, 1)); // ' " at Y5 → mux_a=1
-        key_map.insert('"', (1, 1));  // ' " at Y5 → mux_a=1
+        // Empirically verified mappings:
+        key_map.insert('n', (1, 2));  // a→n
+        key_map.insert('e', (1, 5));  // i→e  
+        key_map.insert('f', (2, 5));  // k→f
+        key_map.insert('i', (7, 3));  // f→i
+        key_map.insert('l', (5, 3));  // e→l
+        key_map.insert('o', (1, 0));  // j→o
+        key_map.insert('p', (7, 0));  // h→p
+        key_map.insert('u', (1, 3));  // g→u
+        key_map.insert('4', (0, 7));  // d→4
+        key_map.insert(';', (2, 4));  // c→;
         
-        // X1 (Mux B = 2): Y0=/ ? Y1=* Y2=Q Y3=Z Y4=W Y5=A
-        key_map.insert('/', (6, 2));  // / ? at Y0 → mux_a=6
-        key_map.insert('?', (6, 2));  // / ? at Y0 → mux_a=6
-        key_map.insert('*', (4, 2));  // * at Y1 → mux_a=4
-        key_map.insert('q', (5, 2));  // Q at Y2 → mux_a=5
-        key_map.insert('z', (7, 2));  // Z at Y3 → mux_a=7
-        key_map.insert('w', (2, 2));  // W at Y4 → mux_a=2
-        key_map.insert('a', (1, 2));  // A at Y5 → mux_a=1
+        // From mux_b pattern analysis:
+        // mux_b: 0→X4, 2→X6, 3→X5, 4→X0, 5→X2, 7→X3
+        // From mux_a pattern analysis:
+        // mux_a: 0→Y1, 1→Y3, 2→Y3 or Y4, 5→Y6, 7→Y5
         
-        // X2 (Mux B = 3): Y0=1 Y1=2 Y2=E Y3=F Y4=R Y5=G
-        key_map.insert('1', (6, 3));  // 1 at Y0 → mux_a=6
-        key_map.insert('2', (4, 3));  // 2 at Y1 → mux_a=4
-        key_map.insert('e', (5, 3));  // E at Y2 → mux_a=5
-        key_map.insert('f', (7, 3));  // F at Y3 → mux_a=7
-        key_map.insert('r', (2, 3));  // R at Y4 → mux_a=2
-        key_map.insert('g', (1, 3));  // G at Y5 → mux_a=1
+        // Need to fill in rest - inferring from keyboard layout
+        // Row X0 (mux_b=4):
+        key_map.insert(' ', (5, 4));  // Guessing SPACE
+        key_map.insert(',', (6, 4));
+        key_map.insert('.', (0, 4));
+        key_map.insert('$', (4, 4));
+        // ';' already mapped above
+        key_map.insert(':', (2, 4));
+        key_map.insert('\n', (2, 4)); // RETURN
+        key_map.insert('\'', (1, 4));
+        key_map.insert('"', (1, 4));
         
-        // X3 (Mux B = 0): Y0=3 Y1=4 Y2=T Y3=H Y4=Y Y5=J
-        key_map.insert('3', (6, 0));  // 3 at Y0 → mux_a=6
-        key_map.insert('4', (4, 0));  // 4 at Y1 → mux_a=4
-        key_map.insert('t', (5, 0));  // T at Y2 → mux_a=5
-        key_map.insert('h', (7, 0));  // H at Y3 → mux_a=7
-        key_map.insert('y', (2, 0));  // Y at Y4 → mux_a=2
-        key_map.insert('j', (1, 0));  // J at Y5 → mux_a=1
+        // Row X1 (mux_b=?): need to find
+        key_map.insert('/', (6, 2));  
+        key_map.insert('?', (6, 2)); 
+        key_map.insert('*', (0, 2));  
+        key_map.insert('q', (4, 2));  
+        key_map.insert('z', (7, 2));  
+        key_map.insert('w', (2, 2));  
+        key_map.insert('a', (1, 2));  
         
-        // X4 (Mux B = 7): Y1=7 Y2=8 Y3=O Y4=S Y5=P Y6=D
-        key_map.insert('7', (4, 7));  // 7 at Y1 → mux_a=4
-        key_map.insert('8', (5, 7));  // 8 at Y2 → mux_a=5
-        key_map.insert('o', (7, 7));  // O at Y3 → mux_a=7
-        key_map.insert('s', (2, 7));  // S at Y4 → mux_a=2
-        key_map.insert('p', (1, 7));  // P at Y5 → mux_a=1
-        key_map.insert('d', (0, 7));  // D at Y6 → mux_a=0
+        // Row X2 (mux_b=5):
+        key_map.insert('1', (6, 5));  
+        key_map.insert('2', (0, 5));  
+        // 'e' already mapped (1,5)
+        // 'f' already mapped (2,5)
+        key_map.insert('r', (2, 5));  
+        key_map.insert('g', (1, 5));  
         
-        // X5 (Mux B = 5): Y1=5 Y2=6 Y3=U Y4=K Y5=I Y6=L
-        key_map.insert('5', (4, 5));  // 5 at Y1 → mux_a=4
-        key_map.insert('6', (5, 5));  // 6 at Y2 → mux_a=5
-        key_map.insert('u', (7, 5));  // U at Y3 → mux_a=7
-        key_map.insert('k', (2, 5));  // K at Y4 → mux_a=2
-        key_map.insert('i', (1, 5));  // I at Y5 → mux_a=1
-        key_map.insert('l', (0, 5));  // L at Y6 → mux_a=0
+        // Row X3 (mux_b=7):
+        key_map.insert('3', (6, 7));  
+        // '4' already mapped (0,7)
+        key_map.insert('t', (4, 7));  
+        key_map.insert('h', (7, 7));  
+        key_map.insert('y', (2, 7));  
+        key_map.insert('j', (1, 7));  
         
-        // X6 (Mux B = 6): Y1=- _ Y3=N Y4=X Y5=M
-        key_map.insert('-', (4, 6));  // - _ at Y1 → mux_a=4
-        key_map.insert('_', (4, 6));  // - _ at Y1 → mux_a=4
-        key_map.insert('n', (7, 6));  // N at Y3 → mux_a=7
-        key_map.insert('x', (2, 6));  // X at Y4 → mux_a=2
-        key_map.insert('m', (1, 6));  // M at Y5 → mux_a=1
+        // Row X4 (mux_b=0):
+        key_map.insert('7', (0, 0));  
+        key_map.insert('8', (4, 0));  
+        // 'o' already mapped (1,0)
+        key_map.insert('s', (2, 0));  
+        // 'p' already mapped (7,0)
+        key_map.insert('d', (5, 0));  
         
-        // X7 (Mux B = 4): Y1=9 Y2=0 Y3=V Y4=C Y5=B Y6=TAB
-        key_map.insert('9', (4, 4));  // 9 at Y1 → mux_a=4
-        key_map.insert('0', (5, 4));  // 0 at Y2 → mux_a=5
-        key_map.insert('v', (7, 4));  // V at Y3 → mux_a=7
-        key_map.insert('c', (2, 4));  // C at Y4 → mux_a=2
-        key_map.insert('b', (1, 4));  // B at Y5 → mux_a=1
-        key_map.insert('\t', (0, 4)); // TAB at Y6 → mux_a=0
+        // Row X5 (mux_b=3):
+        key_map.insert('5', (0, 3));  
+        key_map.insert('6', (4, 3));  
+        // 'u' already mapped (1,3)
+        key_map.insert('k', (2, 3));  
+        // 'i' already mapped (7,3)
+        // 'l' already mapped (5,3)
+        
+        // Row X6 (mux_b=2):
+        key_map.insert('-', (0, 2));  
+        key_map.insert('_', (0, 2));  
+        // 'n' already mapped (1,2)
+        key_map.insert('x', (2, 2));  
+        key_map.insert('m', (1, 2));  
+        
+        // Row X7 (mux_b=?): need to find
+        key_map.insert('9', (0, 6));  
+        key_map.insert('0', (4, 6));  
+        key_map.insert('v', (7, 6));  
+        key_map.insert('c', (2, 6));  
+        key_map.insert('b', (1, 6));  
+        key_map.insert('\t', (5, 6)); 
         
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
@@ -221,9 +237,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: 'abcdefghijk'\n");
+    println!("Testing: 'hello'\n");
     
-    keyboard.type_string("abcdefghijk")?;
+    keyboard.type_string("hello")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
