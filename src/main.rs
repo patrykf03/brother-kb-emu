@@ -98,37 +98,37 @@ impl Keyboard {
         key_map.insert('t', (1, 7));  
         key_map.insert('w', (7, 6));  
         key_map.insert('m', (7, 2));  
+        key_map.insert('h', (2, 7));
+        key_map.insert('s', (2, 0));
         
-        // Fixed from latest test:
-        key_map.insert('h', (2, 7));  // c→h, so h is at (2,7)
-        key_map.insert('s', (2, 0));  // j→s, so s is at (2,0)
-        key_map.insert('2', (0, 5));  // l→2, so 2 is at (0,5)
-        
-        // Numbers:
+        // Numbers confirmed:
         key_map.insert('1', (5, 3));  
+        key_map.insert('2', (0, 5));  
         key_map.insert('3', (3, 7));  
         key_map.insert('4', (0, 7));  
+        key_map.insert('6', (0, 3));  // l→6
+        key_map.insert('8', (0, 0));  // j→8
         
-        // Still need to find correct positions for: a, b, c, d, g, j, k, l, r, v
-        // Testing with unused mux positions:
-        key_map.insert('a', (6, 2));  // Trying different position
-        key_map.insert('b', (1, 4));  // Currently produces |, needs fix
-        key_map.insert('c', (4, 7));  // Trying different position
-        key_map.insert('d', (5, 0));  // Guess
-        key_map.insert('g', (4, 3));  // Trying different position 
-        key_map.insert('j', (0, 0));  // Trying different position
-        key_map.insert('k', (2, 3));  // Guess
-        key_map.insert('l', (0, 3));  // Trying different position
-        key_map.insert('r', (4, 5));  // Trying different position
-        key_map.insert('v', (7, 4));  // Currently makes fraction, needs fix
+        // Still need to find: a, b, c, d, g, j, k, l, r, v, space
+        // Trying different unused positions:
+        key_map.insert('a', (5, 2));  
+        key_map.insert('b', (5, 7));  
+        key_map.insert('c', (2, 4));  
+        key_map.insert('d', (6, 7));  
+        key_map.insert('g', (2, 3));  
+        key_map.insert('j', (3, 0));  
+        key_map.insert('k', (4, 3));  
+        key_map.insert('l', (6, 5));  
+        key_map.insert('r', (4, 2));  
+        key_map.insert('v', (3, 6));  
         
         // Punctuation and special
-        key_map.insert(' ', (6, 0));  // Trying different position
+        key_map.insert(' ', (0, 1));  
         key_map.insert(',', (6, 1));
         key_map.insert('.', (0, 4));
         key_map.insert('$', (4, 4));
-        key_map.insert(';', (2, 4));
-        key_map.insert(':', (2, 4));
+        key_map.insert(';', (7, 1));
+        key_map.insert(':', (7, 1));
         key_map.insert('\n', (2, 1));
         key_map.insert('\'', (1, 1));
         key_map.insert('"', (1, 1));
@@ -137,14 +137,12 @@ impl Keyboard {
         key_map.insert('*', (0, 2));  
         key_map.insert('-', (4, 6));  
         key_map.insert('_', (4, 6));  
-        key_map.insert('\t', (0, 4));
+        key_map.insert('\t', (6, 0));
         
         // More numbers
         key_map.insert('0', (5, 4));
         key_map.insert('5', (4, 5));  
-        key_map.insert('6', (5, 5));  
         key_map.insert('7', (4, 0));  
-        key_map.insert('8', (5, 7));  
         key_map.insert('9', (4, 4)); 
         
         Ok(Keyboard {
@@ -240,9 +238,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: 'the quick brown fox jumps over the lazy dog'\\n");
+    println!("Testing: ' abcdgjklrv'\\n");
     
-    keyboard.type_string_interactive("the quick brown fox jumps over the lazy dog")?;
+    keyboard.type_string_interactive(" abcdgjklrv")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
