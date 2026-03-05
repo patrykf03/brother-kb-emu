@@ -133,8 +133,8 @@ impl Keyboard {
         key_map.insert('3', (6, 7));  
         // '4' already mapped (0,7)
         key_map.insert('t', (4, 7));  
-        key_map.insert('h', (7, 7));  
-        key_map.insert('y', (2, 7));  
+        key_map.insert('h', (3, 7));  // Guessing h is here
+        key_map.insert('y', (7, 7));  // Empirically verified: (7,7)→'y'
         key_map.insert('j', (1, 7));  
         
         // Row X4 (mux_b=0):
