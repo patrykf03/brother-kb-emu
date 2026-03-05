@@ -177,7 +177,7 @@ impl Keyboard {
         // Enable the multiplexers to "press" the key
         self.enable.set_low();
         
-        // Hold for 10ms
+        // Hold for 50ms
         thread::sleep(Duration::from_millis(50));
         
         // Release the key
@@ -201,7 +201,7 @@ impl Keyboard {
             self.press_key(ch_lower)?;
             
             // Small delay between keypresses for reliability
-            thread::sleep(Duration::from_millis(50));
+            thread::sleep(Duration::from_millis(300));
         }
         Ok(())
     }
