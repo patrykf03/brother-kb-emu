@@ -170,7 +170,7 @@ impl Keyboard {
         self.enable.set_low();
         
         // Hold for 10ms
-        thread::sleep(Duration::from_millis(10));
+        thread::sleep(Duration::from_millis(50));
         
         // Release the key
         self.enable.set_high();
