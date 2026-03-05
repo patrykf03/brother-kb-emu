@@ -93,7 +93,7 @@ impl Keyboard {
         // Row 2 (Mux B = 1)
         key_map.insert('\n', (0, 1)); // enter
         key_map.insert('w', (2, 1));
-        key_map.insert('a', (1, 3));
+        key_map.insert('a', (3, 1));
         key_map.insert('q', (4, 1));
         key_map.insert('z', (5, 1));
         key_map.insert('+', (7, 1));
@@ -220,7 +220,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //println!("Typing: \"{}\"", test_text);
     //
     //keyboard.type_string(test_text)?;
-    keyboard.press_key('a')?;
+    for b_ch in 0..=7 {
+        for a_ch in 0..=7 {
+            println!("--- Multiplexer Control ---");
+            println!("Setting Mux A: Channel {} | Mux B: Channel {}", a_ch, b_ch);
+            println!("---------------------------");
+            println!("Mux A Pins (S0,S1,S2): {}, {}, {}", MUX_A_S0, MUX_A_S1, MUX_A_S2);
+            println!("Mux B Pins (S0,S1,S2): {}, {}, {}", MUX_B_S0, MUX_B_S1, MUX_B_S2);
+            println!("Enable Pin: {} (State: LOW/ON)", ENABLE_PIN);
+            
+            // Set both channels
+            keyboard.enable.set_high(); // Disable before changing channels
+            keyboard.mux_a.set_channel(a_ch, &mut keyboard.enable);
+            keyboard.mux_b.set_channel(b_ch, &mut keyboard.enable);
+            keyboard.enable.set_low(); // Re-enable after setting channels
+            
+            // Wait 50ms
+            thread::sleep(Duration::from_millis(50));
+        }
+    }
 
     println!("\nTyping complete!");
     println!("Disabling multiplexers...");
