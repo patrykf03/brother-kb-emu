@@ -2,6 +2,7 @@ use rppal::gpio::{Gpio, OutputPin};
 use std::collections::HashMap;
 use std::time::Duration;
 use std::thread;
+use std::io::{self, BufRead};
 
 // Pin Definitions based on the schematic
 const ENABLE_PIN: u8 = 6;
@@ -130,10 +131,10 @@ impl Keyboard {
         key_map.insert('g', (1, 5));  
         
         // Row X3 (mux_b=7):
-        key_map.insert('3', (6, 7));  
+        key_map.insert('3', (3, 7));  // Empirically verified: (3,7)→'3'
         // '4' already mapped (0,7)
         key_map.insert('t', (4, 7));  
-        key_map.insert('h', (3, 7));  // Guessing h is here
+        key_map.insert('h', (6, 7));  // Trying h here
         key_map.insert('y', (7, 7));  // Empirically verified: (7,7)→'y'
         key_map.insert('j', (1, 7));  
         
@@ -222,6 +223,30 @@ impl Keyboard {
         }
         Ok(())
     }
+    
+    /// Type a string with Enter confirmation between each character
+    fn type_string_interactive(&mut self, text: &str) -> Result<(), String> {
+        let stdin = io::stdin();
+        let mut handle = stdin.lock();
+        
+        for ch in text.chars() {
+            // Convert to lowercase for simplicity
+            let ch_lower = ch.to_ascii_lowercase();
+            
+            // Skip unmapped characters with a warning
+            if !self.key_map.contains_key(&ch_lower) {
+                println!("Warning: Skipping unmapped character '{}'", ch);
+                continue;
+            }
+            
+            println!("\n--- Ready to type '{}' (Press Enter) ---", ch);
+            let mut line = String::new();
+            handle.read_line(&mut line).map_err(|e| e.to_string())?;
+            
+            self.press_key(ch_lower)?;
+        }
+        Ok(())
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -237,9 +262,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: 'hello'\n");
+    println!("Testing: 'the quick brown fox jumps over the lazy dog'\n");
     
-    keyboard.type_string("hello")?;
+    keyboard.type_string_interactive("the quick brown fox jumps over the lazy dog")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
