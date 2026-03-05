@@ -82,66 +82,74 @@ impl Keyboard {
         
         // Build mapping table based on mappingtable.md
         // Format: (mux_a_channel, mux_b_channel) where channels are 0-indexed
-        // Row index = mux_b channel (0-7), Column index = mux_a channel (0-7)
+        // Rows = X0-X7 (mux_b 0-7), Columns = Y7-Y0 (mux_a 7-0)
         
-        // Row 1 (Mux B = 0)
-        key_map.insert(' ', (0, 0));  // spacebar
-        key_map.insert(';', (5, 0));
-        key_map.insert(',', (6, 0));
-        key_map.insert('.', (7, 0));
+        // X0 (Mux B = 0)
+        key_map.insert(' ', (6, 0));  // SPACE
+        key_map.insert(',', (0, 0));  // ,
+        key_map.insert('.', (1, 0));  // .
+        key_map.insert('$', (2, 0));  // $
+        key_map.insert(';', (3, 0));  // : ;
+        key_map.insert(':', (3, 0));  // : ;
+        key_map.insert('\n', (4, 0)); // RETURN
+        key_map.insert('\'', (5, 0)); // ' "
+        key_map.insert('"', (5, 0));  // ' "
         
-        // Row 2 (Mux B = 1)
-        key_map.insert('\n', (0, 1)); // enter
-        key_map.insert('w', (2, 1));
-        key_map.insert('a', (3, 1));
-        key_map.insert('q', (4, 1));
-        key_map.insert('z', (5, 1));
-        key_map.insert('+', (7, 1));
+        // X1 (Mux B = 1)
+        key_map.insert('/', (0, 1));  // / ?
+        key_map.insert('?', (0, 1));  // / ?
+        key_map.insert('*', (1, 1));  // *
+        key_map.insert('q', (2, 1));  // Q
+        key_map.insert('z', (3, 1));  // Z
+        key_map.insert('w', (4, 1));  // W
+        key_map.insert('a', (5, 1));  // A
         
-        // Row 3 (Mux B = 2)
-        key_map.insert('r', (2, 2));
-        key_map.insert('g', (3, 2));
-        key_map.insert('e', (4, 2));
-        key_map.insert('f', (5, 2));
-        key_map.insert('1', (6, 2));
-        key_map.insert('2', (7, 2));
+        // X2 (Mux B = 2)
+        key_map.insert('1', (0, 2));  // 1
+        key_map.insert('2', (1, 2));  // 2
+        key_map.insert('e', (2, 2));  // E
+        key_map.insert('f', (3, 2));  // F
+        key_map.insert('r', (4, 2));  // R
+        key_map.insert('g', (5, 2));  // G
         
-        // Row 4 (Mux B = 3)
-        key_map.insert('y', (2, 3));
-        key_map.insert('j', (3, 3));
-        key_map.insert('t', (4, 3));
-        key_map.insert('h', (5, 3));
-        key_map.insert('3', (6, 3));
-        key_map.insert('4', (7, 3));
+        // X3 (Mux B = 3)
+        key_map.insert('3', (0, 3));  // 3
+        key_map.insert('4', (1, 3));  // 4
+        key_map.insert('t', (2, 3));  // T
+        key_map.insert('h', (3, 3));  // H
+        key_map.insert('y', (4, 3));  // Y
+        key_map.insert('j', (5, 3));  // J
         
-        // Row 5 (Mux B = 4)
-        key_map.insert('p', (2, 4));
-        key_map.insert('d', (3, 4));
-        key_map.insert('o', (4, 4));
-        key_map.insert('s', (5, 4));
-        key_map.insert('7', (6, 4));
-        key_map.insert('8', (7, 4));
+        // X4 (Mux B = 4)
+        key_map.insert('7', (1, 4));  // 7
+        key_map.insert('8', (2, 4));  // 8
+        key_map.insert('o', (3, 4));  // O
+        key_map.insert('s', (4, 4));  // S
+        key_map.insert('p', (5, 4));  // P
+        key_map.insert('d', (6, 4));  // D
         
-        // Row 6 (Mux B = 5)
-        key_map.insert('i', (2, 5));
-        key_map.insert('l', (3, 5));
-        key_map.insert('u', (4, 5));
-        key_map.insert('k', (5, 5));
-        key_map.insert('5', (6, 5));
-        key_map.insert('6', (7, 5));
+        // X5 (Mux B = 5)
+        key_map.insert('5', (1, 5));  // 5
+        key_map.insert('6', (2, 5));  // 6
+        key_map.insert('u', (3, 5));  // U
+        key_map.insert('k', (4, 5));  // K
+        key_map.insert('i', (5, 5));  // I
+        key_map.insert('l', (6, 5));  // L
         
-        // Row 7 (Mux B = 6)
-        key_map.insert('m', (2, 6));
-        key_map.insert('n', (4, 6));
-        key_map.insert('x', (5, 6));
-        key_map.insert('?', (6, 6));
+        // X6 (Mux B = 6)
+        key_map.insert('-', (1, 6));  // - _
+        key_map.insert('_', (1, 6));  // - _
+        key_map.insert('n', (3, 6));  // N
+        key_map.insert('x', (4, 6));  // X
+        key_map.insert('m', (5, 6));  // M
         
-        // Row 8 (Mux B = 7)
-        key_map.insert('b', (2, 7));
-        key_map.insert('v', (4, 7));
-        key_map.insert('c', (5, 7));
-        key_map.insert('9', (6, 7));
-        key_map.insert('0', (7, 7));
+        // X7 (Mux B = 7)
+        key_map.insert('9', (1, 7));  // 9
+        key_map.insert('0', (2, 7));  // 0
+        key_map.insert('v', (3, 7));  // V
+        key_map.insert('c', (4, 7));  // C
+        key_map.insert('b', (5, 7));  // B
+        key_map.insert('\t', (6, 7)); // TAB
         
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
@@ -216,29 +224,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("---");
     
     // Example: Type a test string
-    //let test_text = "hello world 123";
-    //println!("Typing: \"{}\"", test_text);
-    //
-    //keyboard.type_string(test_text)?;
-    for b_ch in 0..=7 {
-        for a_ch in 0..=7 {
-            println!("--- Multiplexer Control ---");
-            println!("Setting Mux A: Channel {} | Mux B: Channel {}", a_ch, b_ch);
-            println!("---------------------------");
-            println!("Mux A Pins (S0,S1,S2): {}, {}, {}", MUX_A_S0, MUX_A_S1, MUX_A_S2);
-            println!("Mux B Pins (S0,S1,S2): {}, {}, {}", MUX_B_S0, MUX_B_S1, MUX_B_S2);
-            println!("Enable Pin: {} (State: LOW/ON)", ENABLE_PIN);
-            
-            // Set both channels
-            keyboard.enable.set_high(); // Disable before changing channels
-            keyboard.mux_a.set_channel(a_ch, &mut keyboard.enable);
-            keyboard.mux_b.set_channel(b_ch, &mut keyboard.enable);
-            keyboard.enable.set_low(); // Re-enable after setting channels
-            
-            // Wait 50ms
-            thread::sleep(Duration::from_millis(50));
-        }
-    }
+    let test_text = "hello world 123";
+    println!("Typing: \"{}\"", test_text);
+    
+    keyboard.type_string(test_text)?;
 
     println!("\nTyping complete!");
     println!("Disabling multiplexers...");
