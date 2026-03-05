@@ -221,9 +221,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: 'hello'\n");
+    println!("Testing: 'abcdefghijk'\n");
     
-    keyboard.type_string("hello")?;
+    keyboard.type_string("abcdefghijk")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
