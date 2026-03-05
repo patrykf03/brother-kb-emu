@@ -1,5 +1,4 @@
 use rppal::gpio::{Gpio, OutputPin};
-use std::process;
 
 // Pin Definitions based on the schematic
 const ENABLE_PIN: u8 = 6;
@@ -33,28 +32,27 @@ impl Multiplexer {
     /// Set the channel (0-7) for this multiplexer
     /// The enable pin is disabled during transition and re-enabled after
     fn set_channel(&mut self, channel: u8, enable: &mut OutputPin) {
-        
         // save current enable state
         let was_enabled = enable.is_set_low();
         // Disable the multiplexer (active LOW)
         enable.set_high();
         
         // Set S0 (Bit 0)
-        if (channel >> 0) & 1 == 1 {
+        if channel & (1 << 0) != 0 {
             self.s0.set_high();
         } else {
             self.s0.set_low();
         }
         
         // Set S1 (Bit 1)
-        if (channel >> 1) & 1 == 1 {
+        if channel & (1 << 1) != 0 {
             self.s1.set_high();
         } else {
             self.s1.set_low();
         }
         
         // Set S2 (Bit 2)
-        if (channel >> 2) & 1 == 1 {
+        if channel & (1 << 2) != 0 {
             self.s2.set_high();
         } else {
             self.s2.set_low();
@@ -64,32 +62,14 @@ impl Multiplexer {
         if was_enabled {
             enable.set_low();
         }
-        
     }
 }
 
-fn clear_screen() {
-    print!("\x1B[2J\x1B[1;1H");
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Set up Ctrl+C handler
-    ctrlc::set_handler(|| {
-        println!("\nReceived Ctrl+C, exiting...");
-        process::exit(0);
-    })
-    .expect("Error setting Ctrl+C handler");
-    
     println!("Initializing GPIO pins...");
     
     // Initialize GPIO
-    let gpio = match Gpio::new() {
-        Ok(g) => g,
-        Err(e) => {
-            eprintln!("Error initializing GPIO: {}", e);
-            process::exit(1);
-        }
-    };
+    let gpio = Gpio::new()?;
     
     // Initialize enable pin and multiplexers
     let mut enable = gpio.get(ENABLE_PIN)?.into_output();
@@ -100,14 +80,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     enable.set_low();
     
     println!("Initialization complete. Starting channel sequence.");
-    println!("Cycling through all combinations with 2s delay. Press Ctrl+C to exit.");
+    println!("Cycling through all combinations with 2s delay.");
     std::thread::sleep(std::time::Duration::from_secs(1));
     
     // Iterate through all 64 combinations (8x8)
     // Outer loop: Mux B, Inner loop: Mux A
     for b_ch in 0..=7 {
         for a_ch in 0..=7 {
-            clear_screen();
             println!("--- Multiplexer Control ---");
             println!("Setting Mux A: Channel {} | Mux B: Channel {}", a_ch, b_ch);
             println!("---------------------------");
@@ -116,11 +95,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Enable Pin: {} (State: LOW/ON)", ENABLE_PIN);
             
             // Set both channels
+            enable.set_high(); // Disable before changing channels
             mux_a.set_channel(a_ch, &mut enable);
             mux_b.set_channel(b_ch, &mut enable);
+            enable.set_low(); // Re-enable after setting channels
             
-            // Wait 2 seconds before next combination
-            std::thread::sleep(std::time::Duration::from_secs(2));
+            // Wait 1 second before next combination
+            std::thread::sleep(std::time::Duration::from_secs(1));
         }
     }
     
