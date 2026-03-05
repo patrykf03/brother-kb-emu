@@ -177,8 +177,8 @@ impl Keyboard {
         // Enable the multiplexers to "press" the key
         self.enable.set_low();
         
-        // Hold for 50ms
-        thread::sleep(Duration::from_millis(50));
+        // Hold for 100ms
+        thread::sleep(Duration::from_millis(100));
         
         // Release the key
         self.enable.set_high();
@@ -201,7 +201,7 @@ impl Keyboard {
             self.press_key(ch_lower)?;
             
             // Small delay between keypresses for reliability
-            thread::sleep(Duration::from_millis(300));
+            thread::sleep(Duration::from_millis(500));
         }
         Ok(())
     }
@@ -224,7 +224,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("---");
     
     // Example: Type a test string
-    let test_text = "hello world 123";
+    let test_text = "hello";
     println!("Typing: \"{}\"", test_text);
     
     keyboard.type_string(test_text)?;
