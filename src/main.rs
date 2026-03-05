@@ -82,71 +82,70 @@ impl Keyboard {
         
         // Build mapping table based on empirical testing  
         // Format: (mux_a_channel, mux_b_channel)
-        // Each entry maps the character we WANT to type to the mux channels that produce it
         
-        // Empirically verified mappings from testing:
-        key_map.insert('n', (1, 2));  // a,m→n confirms this
-        key_map.insert('e', (1, 5));  // g,i→e 
-        key_map.insert('f', (2, 5));  // r,k→f
-        key_map.insert('i', (7, 3));  // f→i
-        key_map.insert('o', (1, 0));  // j→o
-        key_map.insert('p', (7, 0));  // h→p
-        key_map.insert('u', (1, 3));  // g→u
-        key_map.insert('y', (7, 7));  // h→y
-        key_map.insert('z', (2, 6));  // c→z
-        key_map.insert('q', (1, 6));  // b→q
-        key_map.insert('x', (2, 2));  // w→x
-        key_map.insert('t', (1, 7));  // j→t
-        key_map.insert('w', (7, 6));  // v→w
-        key_map.insert('m', (7, 2));  // z→m
-        key_map.insert(';', (2, 4));  // c→;
-        key_map.insert(':', (2, 4));  // same as semicolon
+        // Confirmed working letters:
+        key_map.insert('n', (1, 2));  
+        key_map.insert('e', (1, 5));  
+        key_map.insert('f', (2, 5));  
+        key_map.insert('i', (7, 3));  
+        key_map.insert('o', (1, 0));  
+        key_map.insert('p', (7, 0));  
+        key_map.insert('u', (1, 3));  
+        key_map.insert('y', (7, 7));  
+        key_map.insert('z', (2, 6));  
+        key_map.insert('q', (1, 6));  
+        key_map.insert('x', (2, 2));  
+        key_map.insert('t', (1, 7));  
+        key_map.insert('w', (7, 6));  
+        key_map.insert('m', (7, 2));  
         
-        // Number keys from earlier tests:
-        key_map.insert('1', (5, 3));  // l→1
-        key_map.insert('3', (3, 7));  // h→3
-        key_map.insert('4', (0, 7));  // d→4
+        // Fixed from latest test:
+        key_map.insert('h', (2, 7));  // c→h, so h is at (2,7)
+        key_map.insert('s', (2, 0));  // j→s, so s is at (2,0)
+        key_map.insert('2', (0, 5));  // l→2, so 2 is at (0,5)
         
-        // Need to find correct mappings for these characters that are currently wrong:
-        // t, h, space, q (backspace), c, b, r, w, j, m, v, l, a, z, g
-        // Will map them to unused mux positions - these are guesses that need testing:
+        // Numbers:
+        key_map.insert('1', (5, 3));  
+        key_map.insert('3', (3, 7));  
+        key_map.insert('4', (0, 7));  
         
-        key_map.insert('a', (5, 2));  // Guessing
-        key_map.insert('b', (1, 4));  // earlier test showed this as |
-        key_map.insert('c', (2, 7));  // Guessing
-        key_map.insert('d', (5, 0));  // Guessing  
-        key_map.insert('g', (1, 3));  // Wait, (1,3)→u, so this is wrong
-        key_map.insert('h', (4, 7));  // Currently produces function beep
-        key_map.insert('j', (2, 0));  // Guessing
-        key_map.insert('k', (2, 3));  // Guessing
-        key_map.insert('l', (0, 5));  // Guessing
-        key_map.insert('r', (4, 3));  // Guessing
-        key_map.insert('s', (2, 7));  // Guessing
-        key_map.insert('v', (7, 4));  // Guessing
+        // Still need to find correct positions for: a, b, c, d, g, j, k, l, r, v
+        // Testing with unused mux positions:
+        key_map.insert('a', (6, 2));  // Trying different position
+        key_map.insert('b', (1, 4));  // Currently produces |, needs fix
+        key_map.insert('c', (4, 7));  // Trying different position
+        key_map.insert('d', (5, 0));  // Guess
+        key_map.insert('g', (4, 3));  // Trying different position 
+        key_map.insert('j', (0, 0));  // Trying different position
+        key_map.insert('k', (2, 3));  // Guess
+        key_map.insert('l', (0, 3));  // Trying different position
+        key_map.insert('r', (4, 5));  // Trying different position
+        key_map.insert('v', (7, 4));  // Currently makes fraction, needs fix
         
         // Punctuation and special
-        key_map.insert(' ', (5, 4));  // Currently makes middle dot
+        key_map.insert(' ', (6, 0));  // Trying different position
         key_map.insert(',', (6, 1));
         key_map.insert('.', (0, 4));
         key_map.insert('$', (4, 4));
+        key_map.insert(';', (2, 4));
+        key_map.insert(':', (2, 4));
         key_map.insert('\n', (2, 1));
         key_map.insert('\'', (1, 1));
         key_map.insert('"', (1, 1));
         key_map.insert('/', (6, 2));  
         key_map.insert('?', (6, 2)); 
         key_map.insert('*', (0, 2));  
-        key_map.insert('-', (0, 2));  
-        key_map.insert('_', (0, 2));  
-        key_map.insert('\t', (3, 4));
+        key_map.insert('-', (4, 6));  
+        key_map.insert('_', (4, 6));  
+        key_map.insert('\t', (0, 4));
         
         // More numbers
         key_map.insert('0', (5, 4));
-        key_map.insert('2', (0, 5));  
-        key_map.insert('5', (0, 3));  
-        key_map.insert('6', (4, 3));  
-        key_map.insert('7', (0, 0));  
-        key_map.insert('8', (4, 0));  
-        key_map.insert('9', (0, 6)); 
+        key_map.insert('5', (4, 5));  
+        key_map.insert('6', (5, 5));  
+        key_map.insert('7', (4, 0));  
+        key_map.insert('8', (5, 7));  
+        key_map.insert('9', (4, 4)); 
         
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
