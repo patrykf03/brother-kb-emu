@@ -148,26 +148,35 @@ impl Keyboard {
         key_map.insert('¾', (0, 2));  // 3/4 fraction
         key_map.insert('½', (3, 6));  // 1/2 fraction
         key_map.insert('⅔', (7, 4));  // 2/3 fraction
+        
+        // Function keys (based on testing)
+        key_map.insert('\n', (4, 6)); // Enter key
                 
-        // Test characters for unmapped combinations (control functions, errors, or do nothing):
-        key_map.insert('!', (4, 0));  // error beep
-        key_map.insert('@', (4, 1));  // does nothing
-        key_map.insert('#', (4, 2));  // removes from page
-        key_map.insert('$', (4, 3));  // seemingly backspaces
-        key_map.insert('%', (4, 5));  // does a subscript carriage lower
-        key_map.insert('^', (4, 6));  // might be enter but im unsure
-        key_map.insert('&', (4, 7));  // does a weird beep and then nothing
-        key_map.insert('*', (5, 1));  // whatever form of tab this does which seems to be end page
-        key_map.insert('(', (5, 2));  // resets the wheel it seems
-        key_map.insert('_', (6, 0));  // does nothing
-        key_map.insert('+', (6, 1));  // does nothing
-        key_map.insert('[', (6, 2));  // does nothing
-        key_map.insert(']', (6, 3));  // does nothing
-        key_map.insert('{', (6, 4));  // does nothing
-        key_map.insert('}', (6, 5));  // does nothing
-        key_map.insert('\\', (6, 6));  // does nothing
-        key_map.insert('/', (6, 7));  // might be p insert
-          
+        // probably accurate functions
+        // somewhere on this row also: relocate, word out, correct and code
+        // (4,0) - 
+        // (4,1) - 
+        // (4,2) - 
+        // (4,3) - Backspace
+        // (4,5) - Index
+        // (4,6) - Enter
+        // (4,7) - 
+
+
+        // confirmed function keys
+        // (5,1) - tab
+        // (5,2) - cover switch (negative)
+        // (6,4) - shift 
+        // (6,5) - page insert
+        // (6,6) - capslock
+        // (6,7) - alt
+
+        // confirmed useless
+        // (6,0) - nothing
+        // (6,1) - nothing
+        // (6,2) - nothing
+        // (6,3) - nothing
+
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
             mux_b: Multiplexer::new(gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?,
@@ -288,21 +297,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing unmapped key combinations by holding for 3 seconds each...\n");
+    println!("Ready to type.\n");
     
-    // Hold each unmapped key for 3 seconds to test behavior
-    let test_chars = "!@#$%^&*()_+[]{}\\/'";
-    for ch in test_chars.chars() {
-        println!("\n--- Press Enter to test '{}' ---", ch);
-        let stdin = io::stdin();
-        let mut line = String::new();
-        stdin.read_line(&mut line)?;
-        
-        keyboard.hold_key(ch, 3000)?;
-        
-        // Wait a bit before next test
-        thread::sleep(Duration::from_millis(1000));
-    }
+    keyboard.type_string("The quick brown fox jumps over the lazy dog\n Hello Hacklab")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
