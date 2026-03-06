@@ -102,30 +102,31 @@ impl Keyboard {
         key_map.insert('s', (2, 0));
         
         // Numbers confirmed:
-        key_map.insert('1', (3, 5));  // l→1
+        key_map.insert('0', (0, 1));  // space→0
+        key_map.insert('1', (3, 5));  
         key_map.insert('2', (0, 5));  
         key_map.insert('3', (3, 7));  
         key_map.insert('4', (0, 7));  
         key_map.insert('6', (0, 3));  
         key_map.insert('7', (3, 0));  
         key_map.insert('8', (0, 0));  
-        key_map.insert('9', (3, 1));  // c→9
+        key_map.insert('9', (3, 1));  
         
         // Fixed from latest test:
         key_map.insert('j', (5, 7));  
         key_map.insert('k', (2, 3));  
-        key_map.insert('a', (5, 6));  // v→a
-        key_map.insert('c', (2, 1));  // r→c
-        key_map.insert('v', (1, 1));  // g→v
+        key_map.insert('a', (5, 6));  
+        key_map.insert('c', (2, 1));  
+        key_map.insert('v', (1, 1));  
         
         // Still need to find: b, d, g, l, r, space
-        // Trying completely unused positions:
-        key_map.insert('b', (5, 4));  
-        key_map.insert('d', (6, 0));  
-        key_map.insert('g', (1, 3));  
+        // Trying completely new unused positions:
+        key_map.insert('b', (4, 0));  
+        key_map.insert('d', (5, 0));  
+        key_map.insert('g', (4, 1));  
         key_map.insert('l', (6, 5));  
-        key_map.insert('r', (4, 3));  
-        key_map.insert(' ', (0, 1));  
+        key_map.insert('r', (4, 2));  
+        key_map.insert(' ', (5, 2));  
         
         // Punctuation and special
         key_map.insert(',', (6, 1));
@@ -242,9 +243,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing remaining: ' bdglr'\\n");
+    println!("Testing: 'hello'\\n");
     
-    keyboard.type_string_interactive(" bdglr")?;
+    keyboard.type_string_interactive("abcdefghijklmnopqrstuvwxyz1234567890")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
