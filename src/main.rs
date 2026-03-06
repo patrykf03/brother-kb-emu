@@ -102,31 +102,32 @@ impl Keyboard {
         key_map.insert('s', (2, 0));
         
         // Numbers confirmed:
-        key_map.insert('1', (5, 3));  
+        key_map.insert('1', (3, 5));  // l→1
         key_map.insert('2', (0, 5));  
         key_map.insert('3', (3, 7));  
         key_map.insert('4', (0, 7));  
         key_map.insert('6', (0, 3));  
-        key_map.insert('7', (3, 0));  // j→7
+        key_map.insert('7', (3, 0));  
         key_map.insert('8', (0, 0));  
+        key_map.insert('9', (3, 1));  // c→9
         
         // Fixed from latest test:
-        key_map.insert('j', (5, 7));  // b→j
-        key_map.insert('k', (2, 3));  // g→k
+        key_map.insert('j', (5, 7));  
+        key_map.insert('k', (2, 3));  
+        key_map.insert('a', (5, 6));  // v→a
+        key_map.insert('c', (2, 1));  // r→c
+        key_map.insert('v', (1, 1));  // g→v
         
-        // Still need to find: a, b, c, d, g, l, r, v, space
+        // Still need to find: b, d, g, l, r, space
         // Trying completely unused positions:
-        key_map.insert('a', (5, 2));  
-        key_map.insert('b', (1, 4));  
-        key_map.insert('c', (3, 1));  
-        key_map.insert('d', (0, 6));  
-        key_map.insert('g', (1, 1));  
-        key_map.insert('l', (3, 5));  
-        key_map.insert('r', (2, 1));  
-        key_map.insert('v', (5, 6));  
+        key_map.insert('b', (5, 4));  
+        key_map.insert('d', (6, 0));  
+        key_map.insert('g', (1, 3));  
+        key_map.insert('l', (6, 5));  
+        key_map.insert('r', (4, 3));  
+        key_map.insert(' ', (0, 1));  
         
         // Punctuation and special
-        key_map.insert(' ', (6, 4));  
         key_map.insert(',', (6, 1));
         key_map.insert('.', (0, 4));
         key_map.insert('$', (4, 4));
@@ -241,9 +242,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing problematic: ' abcdglrv'\\n");
+    println!("Testing remaining: ' bdglr'\\n");
     
-    keyboard.type_string_interactive(" abcdglrv")?;
+    keyboard.type_string_interactive(" bdglr")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
