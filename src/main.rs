@@ -299,7 +299,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Initialization complete.");
     println!("Ready to type.\n");
     
-    keyboard.type_string("The quick brown fox jumps over the lazy dog\nHello Hacklab")?;
+    keyboard.type_string("The quick brown fox jumps over the lazy dog\nHello Hacklab\n\n\n\n")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
