@@ -100,9 +100,15 @@ impl Keyboard {
         key_map.insert('m', (7, 2));  
         key_map.insert('h', (2, 7));
         key_map.insert('s', (2, 0));
-        
+        key_map.insert(' ', (4,4));  
+        key_map.insert('d', (5, 0));
+        key_map.insert('j', (5, 7));  
+        key_map.insert('k', (2, 3));  
+        key_map.insert('a', (5, 6));  
+        key_map.insert('c', (2, 1));  
+        key_map.insert('v', (1, 1));  
+
         // Numbers confirmed:
-        key_map.insert('0', (0, 1));  // space→0
         key_map.insert('1', (3, 5));  
         key_map.insert('2', (0, 5));  
         key_map.insert('3', (3, 7));  
@@ -110,23 +116,15 @@ impl Keyboard {
         key_map.insert('6', (0, 3));  
         key_map.insert('7', (3, 0));  
         key_map.insert('8', (0, 0));  
-        key_map.insert('9', (3, 1));  
         
-        // Fixed from latest test:
-        key_map.insert('j', (5, 7));  
-        key_map.insert('k', (2, 3));  
-        key_map.insert('a', (5, 6));  
-        key_map.insert('c', (2, 1));  
-        key_map.insert('v', (1, 1));  
+        // map out broken for now
+        //key_map.insert('b', ());  
+        //key_map.insert('g', ());  
+        //key_map.insert('l', ());  
+        //key_map.insert('r', ());  
+        //key_map.insert('0', ());  
+        //key_map.insert('9', ());  
         
-        // Still need to find: b, d, g, l, r, space
-        // Trying completely new unused positions:
-        key_map.insert('b', (4, 0));  
-        key_map.insert('d', (5, 0));  
-        key_map.insert('g', (4, 1));  
-        key_map.insert('l', (6, 5));  
-        key_map.insert('r', (4, 2));  
-        key_map.insert(' ', (5, 2));  
         
         // Punctuation and special
         key_map.insert(',', (6, 1));
@@ -144,11 +142,6 @@ impl Keyboard {
         key_map.insert('_', (4, 6));  
         key_map.insert('\t', (6, 0));
         
-        // More numbers
-        key_map.insert('0', (5, 4));
-        key_map.insert('5', (4, 5));  
-        key_map.insert('7', (4, 0));  
-        key_map.insert('9', (4, 4)); 
         
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
@@ -245,7 +238,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Initialization complete.");
     println!("Testing: 'hello'\\n");
     
-    keyboard.type_string_interactive("abcdefghijklmnopqrstuvwxyz1234567890")?;
+    keyboard.type_string_interactive("abcdefghijklmnopqrstuvwxyz 1234567890")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
