@@ -123,6 +123,7 @@ impl Keyboard {
         
         // mux_a = 5
         key_map.insert('d', (5, 0));
+        key_map.insert('g', (5, 5));
         key_map.insert('a', (5, 6));
         key_map.insert('j', (5, 7));
         
@@ -131,6 +132,7 @@ impl Keyboard {
         key_map.insert('b', (7,1));
         key_map.insert('m', (7, 2));
         key_map.insert('i', (7, 3));
+        key_map.insert('r', (7, 5));
         key_map.insert('w', (7, 6));
         key_map.insert('y', (7, 7));                
         
@@ -141,7 +143,7 @@ impl Keyboard {
         // 0,2 is a 3/4 fraction
         // 3,2 is a - sign
         // 6,0 does nothing
-        // 5,1 is end of page potentially
+        // 5,1 is whatever form of tab this does which seems to be end page
         // 5,2 resets the wheel it seems
         // 6,1 does nothing
         // 0,4 does a .
@@ -161,16 +163,40 @@ impl Keyboard {
         // 6,3 does nothing
         // 6,4 does nothing
         // 6,6 does nothing
+        // 6,7 might be p insert
+        // 7,4 does a 2/3 fraction
 
-
-
-        // to be tested (assigned to unused mux combinations)
-        key_map.insert('^', (5, 5));
-        key_map.insert('-', (6, 7));
-        key_map.insert('+', (7, 4));
-        key_map.insert('[', (7, 5));
-        
-        
+        // Testing all commented combinations
+        key_map.insert('!', (4, 0));  // error beep
+        key_map.insert('@', (4, 1));  // does nothing
+        key_map.insert('#', (6, 5));  // does nothing
+        key_map.insert('$', (4, 2));  // removes from page
+        key_map.insert('%', (0, 2));  // 3/4 fraction
+        key_map.insert('^', (3, 2));  // minus sign
+        key_map.insert('&', (6, 0));  // does nothing
+        key_map.insert('*', (5, 1));  // end page/tab
+        key_map.insert('(', (5, 2));  // resets wheel
+        key_map.insert(')', (6, 1));  // does nothing
+        key_map.insert('-', (0, 4));  // period
+        key_map.insert('+', (1, 4));  // pipe
+        key_map.insert('=', (3, 4));  // comma
+        key_map.insert('[', (5, 4));  // middle dot
+        key_map.insert(']', (0, 6));  // equals
+        key_map.insert('{', (2, 4));  // semicolon
+        key_map.insert('}', (3, 6));  // 1/2 fraction
+        key_map.insert('|', (4, 3));  // backspace
+        key_map.insert('\\', (4, 5));  // subscript carriage lower
+        key_map.insert('/', (4, 6));  // might be enter
+        key_map.insert('?', (4, 7));  // weird beep
+        key_map.insert('<', (5, 3));  // number 1
+        key_map.insert('>', (5, 5));  // to be tested again
+        key_map.insert('~', (6, 2));  // does nothing
+        key_map.insert('`', (6, 3));  // does nothing
+        key_map.insert('.', (6, 4));  // does nothing
+        key_map.insert(',', (6, 6));  // does nothing
+        key_map.insert(';', (6, 7));  // might be p insert
+        key_map.insert(':', (7, 4));  // 2/3 fraction
+          
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
             mux_b: Multiplexer::new(gpio, MUX_B_S0, MUX_B_S1, MUX_B_S2)?,
@@ -264,9 +290,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing remaining 4 combinations...\n");
+    println!("Testing all commented combinations...\n");
     
-    keyboard.type_string_interactive("^-+[")?;
+    keyboard.type_string_interactive("!@#$%^&*()-+=[]{}|\\/?<>~`.,:;")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
