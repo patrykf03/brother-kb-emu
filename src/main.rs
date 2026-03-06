@@ -127,6 +127,7 @@ impl Keyboard {
         
         // mux_a = 7
         key_map.insert('p', (7, 0));
+        key_map.insert('b', (7,1));
         key_map.insert('m', (7, 2));
         key_map.insert('i', (7, 3));
         key_map.insert('w', (7, 6));
@@ -136,13 +137,16 @@ impl Keyboard {
         // 4,1 does nothing
         // 6,5 does nothing
         // 4,2 removes from page
+        // 0,2 is a 3/4 fraction
+        // 3,2 is a - sign
+        // 6,0 does nothing
+        // 5,1 is end of page potentially
 
         // to be tested (assigned to unused mux combinations)
-        key_map.insert('b', (0, 2));  
-        key_map.insert('g', (3, 2));  
-        key_map.insert('l', (6, 0));  
-        key_map.insert('r', (5, 1));  
-        key_map.insert('5', (7, 1));
+        key_map.insert('g', (0, 4));  
+        key_map.insert('l', (3, 3));  
+        key_map.insert('r', (5, 2));  
+        key_map.insert('5', (6, 1));
 
         
         
@@ -242,7 +246,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Initialization complete.");
     println!("Testing: 'hello'\\n");
     
-    keyboard.type_string_interactive("bglr5")?;
+    keyboard.type_string_interactive("glr5")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
