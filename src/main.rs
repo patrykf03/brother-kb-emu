@@ -151,25 +151,21 @@ impl Keyboard {
         // 0,6 does a =
         // 2,4 does a ;
         // 3,6 does a 1/2 fraction
+        // 4,3 seemingly backspaces
+        // 4,5 does a subscript carriage lower
+        // 4,6 might be enter but im unsure
+        // 4,7 does a weird beep and then nothing
+        // 5,3 does a number 1 for some reason
+        // 5,5 to be tested again
+        // 6,2 does nothing
+        // 6,3 does nothing
+        // 6,4 does nothing
+        // 6,6 does nothing
 
 
 
         // to be tested (assigned to unused mux combinations)
-        key_map.insert('g', (0, 6));  
-        key_map.insert('l', (2, 4));  
-        key_map.insert('r', (3, 6));  
-        
-        // Testing remaining unused combinations with fake characters
-        key_map.insert('!', (4, 3));
-        key_map.insert('@', (4, 5));
-        key_map.insert('#', (4, 6));
-        key_map.insert('$', (4, 7));
-        key_map.insert('%', (5, 3));
         key_map.insert('^', (5, 5));
-        key_map.insert('&', (6, 2));
-        key_map.insert('*', (6, 3));
-        key_map.insert('(', (6, 4));
-        key_map.insert(')', (6, 6));
         key_map.insert('-', (6, 7));
         key_map.insert('+', (7, 4));
         key_map.insert('[', (7, 5));
@@ -268,9 +264,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing 13 new combinations...\n");
+    println!("Testing remaining 4 combinations...\n");
     
-    keyboard.type_string_interactive("!@#$%^&*()+[-")?;
+    keyboard.type_string_interactive("^-+[")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
