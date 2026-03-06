@@ -123,79 +123,50 @@ impl Keyboard {
         
         // mux_a = 5
         key_map.insert('d', (5, 0));
+        key_map.insert('l', (5, 3));
         key_map.insert('g', (5, 5));
         key_map.insert('a', (5, 6));
         key_map.insert('j', (5, 7));
         
         // mux_a = 7
         key_map.insert('p', (7, 0));
-        key_map.insert('b', (7,1));
+        key_map.insert('b', (7, 1));
         key_map.insert('m', (7, 2));
         key_map.insert('i', (7, 3));
         key_map.insert('r', (7, 5));
         key_map.insert('w', (7, 6));
-        key_map.insert('y', (7, 7));                
+        key_map.insert('y', (7, 7));
         
-        // (4,0 is an errror beep)
-        // 4,1 does nothing
-        // 6,5 does nothing
-        // 4,2 removes from page
-        // 0,2 is a 3/4 fraction
-        // 3,2 is a - sign
-        // 6,0 does nothing
-        // 5,1 is whatever form of tab this does which seems to be end page
-        // 5,2 resets the wheel it seems
-        // 6,1 does nothing
-        // 0,4 does a .
-        // 1,4 does a |
-        // 3,4 does a ,
-        // 5,4 does a middle dot (·)
-        // 0,6 does a =
-        // 2,4 does a ;
-        // 3,6 does a 1/2 fraction
-        // 4,3 seemingly backspaces
-        // 4,5 does a subscript carriage lower
-        // 4,6 might be enter but im unsure
-        // 4,7 does a weird beep and then nothing
-        // 5,3 does a number 1 for some reason
-        // 5,5 to be tested again
-        // 6,2 does nothing
-        // 6,3 does nothing
-        // 6,4 does nothing
-        // 6,6 does nothing
-        // 6,7 might be p insert
-        // 7,4 does a 2/3 fraction
-
-        // Testing all commented combinations
+        // Symbols
+        key_map.insert('.', (0, 4));
+        key_map.insert(',', (3, 4));
+        key_map.insert(';', (2, 4));
+        key_map.insert('=', (0, 6));
+        key_map.insert('-', (3, 2));
+        key_map.insert('|', (1, 4));
+        key_map.insert('·', (5, 4));  // middle dot
+        key_map.insert('¾', (0, 2));  // 3/4 fraction
+        key_map.insert('½', (3, 6));  // 1/2 fraction
+        key_map.insert('⅔', (7, 4));  // 2/3 fraction
+                
+        // Test characters for unmapped combinations (control functions, errors, or do nothing):
         key_map.insert('!', (4, 0));  // error beep
         key_map.insert('@', (4, 1));  // does nothing
-        key_map.insert('#', (6, 5));  // does nothing
-        key_map.insert('$', (4, 2));  // removes from page
-        key_map.insert('%', (0, 2));  // 3/4 fraction
-        key_map.insert('^', (3, 2));  // minus sign
-        key_map.insert('&', (6, 0));  // does nothing
-        key_map.insert('*', (5, 1));  // end page/tab
-        key_map.insert('(', (5, 2));  // resets wheel
-        key_map.insert(')', (6, 1));  // does nothing
-        key_map.insert('-', (0, 4));  // period
-        key_map.insert('+', (1, 4));  // pipe
-        key_map.insert('=', (3, 4));  // comma
-        key_map.insert('[', (5, 4));  // middle dot
-        key_map.insert(']', (0, 6));  // equals
-        key_map.insert('{', (2, 4));  // semicolon
-        key_map.insert('}', (3, 6));  // 1/2 fraction
-        key_map.insert('|', (4, 3));  // backspace
-        key_map.insert('\\', (4, 5));  // subscript carriage lower
-        key_map.insert('/', (4, 6));  // might be enter
-        key_map.insert('?', (4, 7));  // weird beep
-        key_map.insert('<', (5, 3));  // number 1
-        key_map.insert('>', (5, 5));  // to be tested again
-        key_map.insert('~', (6, 2));  // does nothing
-        key_map.insert('`', (6, 3));  // does nothing
-        key_map.insert('.', (6, 4));  // does nothing
-        key_map.insert(',', (6, 6));  // does nothing
-        key_map.insert(';', (6, 7));  // might be p insert
-        key_map.insert(':', (7, 4));  // 2/3 fraction
+        key_map.insert('#', (4, 2));  // removes from page
+        key_map.insert('$', (4, 3));  // seemingly backspaces
+        key_map.insert('%', (4, 5));  // does a subscript carriage lower
+        key_map.insert('^', (4, 6));  // might be enter but im unsure
+        key_map.insert('&', (4, 7));  // does a weird beep and then nothing
+        key_map.insert('*', (5, 1));  // whatever form of tab this does which seems to be end page
+        key_map.insert('(', (5, 2));  // resets the wheel it seems
+        key_map.insert('_', (6, 0));  // does nothing
+        key_map.insert('+', (6, 1));  // does nothing
+        key_map.insert('[', (6, 2));  // does nothing
+        key_map.insert(']', (6, 3));  // does nothing
+        key_map.insert('{', (6, 4));  // does nothing
+        key_map.insert('}', (6, 5));  // does nothing
+        key_map.insert('\\', (6, 6));  // does nothing
+        key_map.insert('/', (6, 7));  // might be p insert
           
         Ok(Keyboard {
             mux_a: Multiplexer::new(gpio, MUX_A_S0, MUX_A_S1, MUX_A_S2)?,
@@ -225,6 +196,33 @@ impl Keyboard {
         
         // Hold for 100ms
         thread::sleep(Duration::from_millis(100));
+        
+        // Release the key
+        self.enable.set_high();
+        
+        Ok(())
+    }
+    
+    /// Hold down a key for a specified duration in milliseconds
+    fn hold_key(&mut self, ch: char, duration_ms: u64) -> Result<(), String> {
+        // Look up the character in the key map
+        let (mux_a_ch, mux_b_ch) = self.key_map.get(&ch)
+            .ok_or_else(|| format!("Character '{}' not found in key map", ch))?;
+        
+        println!("Holding '{}' → Mux A: {}, Mux B: {} for {}ms", ch, mux_a_ch, mux_b_ch, duration_ms);
+        
+        // Disable multiplexers before changing channels
+        self.enable.set_high();
+        
+        // Set both multiplexer channels
+        self.mux_a.set_channel(*mux_a_ch, &mut self.enable);
+        self.mux_b.set_channel(*mux_b_ch, &mut self.enable);
+        
+        // Enable the multiplexers to "press" the key
+        self.enable.set_low();
+        
+        // Hold for specified duration
+        thread::sleep(Duration::from_millis(duration_ms));
         
         // Release the key
         self.enable.set_high();
@@ -290,9 +288,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing all commented combinations...\n");
+    println!("Testing unmapped key combinations by holding for 3 seconds each...\n");
     
-    keyboard.type_string_interactive("!@#$%^&*()-+=[]{}|\\/?<>~`.,:;")?;
+    // Hold each unmapped key for 3 seconds to test behavior
+    let test_chars = "!@#$%^&*()_+[]{}\\/'";
+    for ch in test_chars.chars() {
+        println!("\n--- Press Enter to test '{}' ---", ch);
+        let stdin = io::stdin();
+        let mut line = String::new();
+        stdin.read_line(&mut line)?;
+        
+        keyboard.hold_key(ch, 3000)?;
+        
+        // Wait a bit before next test
+        thread::sleep(Duration::from_millis(1000));
+    }
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
