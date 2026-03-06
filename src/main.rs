@@ -88,6 +88,7 @@ impl Keyboard {
 
         // mux_a = 0
         key_map.insert('8', (0, 0));
+        key_map.insert('0', (0, 1)); 
         key_map.insert('6', (0, 3));
         key_map.insert('2', (0, 5));
         key_map.insert('4', (0, 7));
@@ -112,6 +113,7 @@ impl Keyboard {
         
         // mux_a = 3
         key_map.insert('7', (3, 0));
+        key_map.insert('9', (3, 1));  
         key_map.insert('1', (3, 5));
         key_map.insert('3', (3, 7));
         
@@ -128,16 +130,20 @@ impl Keyboard {
         key_map.insert('m', (7, 2));
         key_map.insert('i', (7, 3));
         key_map.insert('w', (7, 6));
-        key_map.insert('y', (7, 7));
+        key_map.insert('y', (7, 7));                
         
+        // (4,0 is an errror beep)
+        // 4,1 does nothing
+        // 6,5 does nothing
+        // 4,2 removes from page
+
         // to be tested (assigned to unused mux combinations)
-        key_map.insert('b', (4, 0));  
-        key_map.insert('g', (4, 1));  
-        key_map.insert('l', (6, 5));  
-        key_map.insert('r', (4, 2));  
-        key_map.insert('5', (5, 3));
-        key_map.insert('9', (3, 1));  
-        key_map.insert('0', (0, 1)); 
+        key_map.insert('b', (0, 2));  
+        key_map.insert('g', (3, 2));  
+        key_map.insert('l', (6, 0));  
+        key_map.insert('r', (5, 1));  
+        key_map.insert('5', (7, 1));
+
         
         
         
@@ -236,7 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Initialization complete.");
     println!("Testing: 'hello'\\n");
     
-    keyboard.type_string_interactive("abcdefghijklmnopqrstuvwxyz 1234567890")?;
+    keyboard.type_string_interactive("bglr5")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
