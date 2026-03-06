@@ -106,24 +106,27 @@ impl Keyboard {
         key_map.insert('2', (0, 5));  
         key_map.insert('3', (3, 7));  
         key_map.insert('4', (0, 7));  
-        key_map.insert('6', (0, 3));  // l→6
-        key_map.insert('8', (0, 0));  // j→8
+        key_map.insert('6', (0, 3));  
+        key_map.insert('7', (3, 0));  // j→7
+        key_map.insert('8', (0, 0));  
         
-        // Still need to find: a, b, c, d, g, j, k, l, r, v, space
-        // Trying different unused positions:
+        // Fixed from latest test:
+        key_map.insert('j', (5, 7));  // b→j
+        key_map.insert('k', (2, 3));  // g→k
+        
+        // Still need to find: a, b, c, d, g, l, r, v, space
+        // Trying completely unused positions:
         key_map.insert('a', (5, 2));  
-        key_map.insert('b', (5, 7));  
-        key_map.insert('c', (2, 4));  
-        key_map.insert('d', (6, 7));  
-        key_map.insert('g', (2, 3));  
-        key_map.insert('j', (3, 0));  
-        key_map.insert('k', (4, 3));  
-        key_map.insert('l', (6, 5));  
-        key_map.insert('r', (4, 2));  
-        key_map.insert('v', (3, 6));  
+        key_map.insert('b', (1, 4));  
+        key_map.insert('c', (3, 1));  
+        key_map.insert('d', (0, 6));  
+        key_map.insert('g', (1, 1));  
+        key_map.insert('l', (3, 5));  
+        key_map.insert('r', (2, 1));  
+        key_map.insert('v', (5, 6));  
         
         // Punctuation and special
-        key_map.insert(' ', (0, 1));  
+        key_map.insert(' ', (6, 4));  
         key_map.insert(',', (6, 1));
         key_map.insert('.', (0, 4));
         key_map.insert('$', (4, 4));
@@ -238,9 +241,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: ' abcdgjklrv'\\n");
+    println!("Testing problematic: ' abcdglrv'\\n");
     
-    keyboard.type_string_interactive(" abcdgjklrv")?;
+    keyboard.type_string_interactive(" abcdglrv")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
