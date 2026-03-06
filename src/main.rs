@@ -145,11 +145,16 @@ impl Keyboard {
         // 5,2 resets the wheel it seems
         // 6,1 does nothing
         // 0,4 does a .
+        // 1,4 does a |
+        // 3,4 does a ,
+        // 5,4 does a middle dot (·)
+
+
 
         // to be tested (assigned to unused mux combinations)
-        key_map.insert('g', (1, 4));  
-        key_map.insert('l', (3, 4));  
-        key_map.insert('r', (5, 4));  
+        key_map.insert('g', (0, 6));  
+        key_map.insert('l', (2, 4));  
+        key_map.insert('r', (3, 6));  
 
         
         
