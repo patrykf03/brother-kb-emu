@@ -82,65 +82,63 @@ impl Keyboard {
         
         // Build mapping table based on empirical testing  
         // Format: (mux_a_channel, mux_b_channel)
+        // Sorted by mux_a value
         
-        // Confirmed working letters:
-        key_map.insert('n', (1, 2));  
-        key_map.insert('e', (1, 5));  
-        key_map.insert('f', (2, 5));  
-        key_map.insert('i', (7, 3));  
-        key_map.insert('o', (1, 0));  
-        key_map.insert('p', (7, 0));  
-        key_map.insert('u', (1, 3));  
-        key_map.insert('y', (7, 7));  
-        key_map.insert('z', (2, 6));  
-        key_map.insert('q', (1, 6));  
-        key_map.insert('x', (2, 2));  
-        key_map.insert('t', (1, 7));  
-        key_map.insert('w', (7, 6));  
-        key_map.insert('m', (7, 2));  
-        key_map.insert('h', (2, 7));
-        key_map.insert('s', (2, 0));
-        key_map.insert(' ', (4,4));  
-        key_map.insert('d', (5, 0));
-        key_map.insert('j', (5, 7));  
-        key_map.insert('k', (2, 3));  
-        key_map.insert('a', (5, 6));  
-        key_map.insert('c', (2, 1));  
-        key_map.insert('v', (1, 1));  
+        // Confirmed mappings from testing (mux_a, mux_b):
 
-        // Numbers confirmed:
-        key_map.insert('1', (3, 5));  
-        key_map.insert('2', (0, 5));  
-        key_map.insert('3', (3, 7));  
-        key_map.insert('4', (0, 7));  
-        key_map.insert('6', (0, 3));  
-        key_map.insert('7', (3, 0));  
-        key_map.insert('8', (0, 0));  
+        // mux_a = 0
+        key_map.insert('8', (0, 0));
+        key_map.insert('6', (0, 3));
+        key_map.insert('2', (0, 5));
+        key_map.insert('4', (0, 7));
         
-        // map out broken for now
-        //key_map.insert('b', ());  
-        //key_map.insert('g', ());  
-        //key_map.insert('l', ());  
-        //key_map.insert('r', ());  
-        //key_map.insert('0', ());  
-        //key_map.insert('9', ());  
+        // mux_a = 1
+        key_map.insert('o', (1, 0));
+        key_map.insert('v', (1, 1));
+        key_map.insert('n', (1, 2));
+        key_map.insert('u', (1, 3));
+        key_map.insert('e', (1, 5));
+        key_map.insert('q', (1, 6));
+        key_map.insert('t', (1, 7));
         
+        // mux_a = 2
+        key_map.insert('s', (2, 0));
+        key_map.insert('c', (2, 1));
+        key_map.insert('x', (2, 2));
+        key_map.insert('k', (2, 3));
+        key_map.insert('f', (2, 5));
+        key_map.insert('z', (2, 6));
+        key_map.insert('h', (2, 7));
         
-        // Punctuation and special
-        key_map.insert(',', (6, 1));
-        key_map.insert('.', (0, 4));
-        key_map.insert('$', (4, 4));
-        key_map.insert(';', (7, 1));
-        key_map.insert(':', (7, 1));
-        key_map.insert('\n', (2, 1));
-        key_map.insert('\'', (1, 1));
-        key_map.insert('"', (1, 1));
-        key_map.insert('/', (6, 2));  
-        key_map.insert('?', (6, 2)); 
-        key_map.insert('*', (0, 2));  
-        key_map.insert('-', (4, 6));  
-        key_map.insert('_', (4, 6));  
-        key_map.insert('\t', (6, 0));
+        // mux_a = 3
+        key_map.insert('7', (3, 0));
+        key_map.insert('1', (3, 5));
+        key_map.insert('3', (3, 7));
+        
+        // mux_a = 4
+        key_map.insert(' ', (4, 4));
+        
+        // mux_a = 5
+        key_map.insert('d', (5, 0));
+        key_map.insert('a', (5, 6));
+        key_map.insert('j', (5, 7));
+        
+        // mux_a = 7
+        key_map.insert('p', (7, 0));
+        key_map.insert('m', (7, 2));
+        key_map.insert('i', (7, 3));
+        key_map.insert('w', (7, 6));
+        key_map.insert('y', (7, 7));
+        
+        // to be tested (assigned to unused mux combinations)
+        key_map.insert('b', (4, 0));  
+        key_map.insert('g', (4, 1));  
+        key_map.insert('l', (6, 5));  
+        key_map.insert('r', (4, 2));  
+        key_map.insert('5', (5, 3));
+        key_map.insert('9', (3, 1));  
+        key_map.insert('0', (0, 1)); 
+        
         
         
         Ok(Keyboard {
