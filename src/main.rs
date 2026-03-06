@@ -148,6 +148,9 @@ impl Keyboard {
         // 1,4 does a |
         // 3,4 does a ,
         // 5,4 does a middle dot (·)
+        // 0,6 does a =
+        // 2,4 does a ;
+        // 3,6 does a 1/2 fraction
 
 
 
@@ -155,8 +158,21 @@ impl Keyboard {
         key_map.insert('g', (0, 6));  
         key_map.insert('l', (2, 4));  
         key_map.insert('r', (3, 6));  
-
         
+        // Testing remaining unused combinations with fake characters
+        key_map.insert('!', (4, 3));
+        key_map.insert('@', (4, 5));
+        key_map.insert('#', (4, 6));
+        key_map.insert('$', (4, 7));
+        key_map.insert('%', (5, 3));
+        key_map.insert('^', (5, 5));
+        key_map.insert('&', (6, 2));
+        key_map.insert('*', (6, 3));
+        key_map.insert('(', (6, 4));
+        key_map.insert(')', (6, 6));
+        key_map.insert('-', (6, 7));
+        key_map.insert('+', (7, 4));
+        key_map.insert('[', (7, 5));
         
         
         Ok(Keyboard {
@@ -252,9 +268,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     keyboard.enable.set_high();
     
     println!("Initialization complete.");
-    println!("Testing: 'hello'\\n");
+    println!("Testing 13 new combinations...\n");
     
-    keyboard.type_string_interactive("glr")?;
+    keyboard.type_string_interactive("!@#$%^&*()+[-")?;
 
     println!("\nDisabling multiplexers...");
     keyboard.enable.set_high();
